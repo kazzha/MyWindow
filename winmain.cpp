@@ -1,4 +1,5 @@
 #include <Windows.h>
+#include <sstream>
 
 const wchar_t gClassName[] = L"MyWindowClass";
 
@@ -80,6 +81,23 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 {
 	switch (message)
 	{
+
+	case WM_KEYDOWN:
+	{
+		std::ostringstream oss;
+
+		oss << "Virtual Keycode = " << wParam << std::endl;
+		OutputDebugStringA(oss.str().c_str());
+	}
+	case WM_LBUTTONDOWN:
+	{
+
+
+		std::ostringstream oss;
+		oss << "x : " << LOWORD(lParam) << ", y : " << HIWORD(lParam) << std::endl;
+		OutputDebugStringA(oss.str().c_str());
+		break;
+	}
 	case WM_CLOSE :
 		DestroyWindow(hWnd);
 		break;
