@@ -1,5 +1,10 @@
 #include <Windows.h>
 #include <sstream>
+#include <gdiplus.h>
+
+#pragma comment(lib, "Gdiplus.lib")
+
+using namespace Gdiplus;
 
 const wchar_t gClassName[] = L"MyWindowClass";
 
@@ -15,6 +20,10 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 	int ret = MessageBox(nullptr, L"Hello World", L"MyWindow", MB_ICONQUESTION | MB_OKCANCEL);
 	if (ret == IDYES){}
 	*/
+
+	Gdiplus::GdiplusStartupInput gpsi;
+	ULONG_PTR gdiToken;
+	Gdiplus::GdiplusStartup(&gdiToken, &gpsi, nullptr);
 
 	// 1. '윈도우클래스' 등록
 	WNDCLASSEX wc{};
@@ -41,6 +50,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 
 	
 	// 2. '윈도우'를 생성
+	RECT wr = { 0,0,640,480 };
+	AdjustWindowRect(&wr, WS_OVERLAPPEDWINDOW, FALSE);
 	HWND hwnd;
 	hwnd=CreateWindowEx(
 		0,
@@ -49,8 +60,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
-		640,
-		480,
+		wr.right-wr.left,
+		wr.bottom-wr.top,
 		NULL,
 		NULL,
 		hInstance,
@@ -73,6 +84,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance,
 		DispatchMessage(&msg);
 	}
 
+	Gdiplus::GdiplusShutdown(gdiToken);
 	return msg.wParam;
 }
 
@@ -81,6 +93,7 @@ void OnPaint(HWND hwnd)
 	PAINTSTRUCT ps;
 	HDC hdc = BeginPaint(hwnd, &ps);
 
+	/*
 	HPEN redPen = CreatePen(PS_SOLID, 1, RGB(255,0,0));
 	HBRUSH hatchBrush = CreateHatchBrush(HS_CROSS, RGB(255,0,0));
 
@@ -90,7 +103,19 @@ void OnPaint(HWND hwnd)
 
 	DeleteObject(hatchBrush);
 	DeleteObject(redPen);
+	*/
+
+	Pen redPen(Color(255, 255, 0, 0)); // 소멸자 붙어있어 delete 필요없음
+	HatchBrush hatchBursh(HatchStyle::HatchStyleCross, Color(255, 255, 0, 0));
+	Image image(L"image.png");
+
+	Graphics graphics(hdc);
+	// graphics.DrawRectangle(&redPen, 0, 0, 100, 100);
+	// graphics.FillRectangle()
+	graphics.DrawImage(&image, 0, 0);
+
 	EndPaint(hwnd, &ps);
+	
 }
 
 // 4. '윈도우프로시저' 작성
